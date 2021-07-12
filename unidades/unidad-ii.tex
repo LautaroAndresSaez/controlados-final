@@ -1,0 +1,89 @@
+\chapter{Formas canonicas, observabilidad y controlabilidad}
+
+Para este capítulo trabajaremos con los sistemas de la forma: 
+
+\begin{equation}
+    \label{eq:sis}
+    \siseq{
+        qx = \Phi x + \Gamma u \\ 
+        y = C x + D u
+    }
+\end{equation}
+
+Cuya ecuación caracteristica esta dada como: 
+
+\begin{equation}
+    |\Phi - \lambda I| = \sum_{i=0}^n a_{n-i} \lambda^i
+\end{equation}
+
+Tomaremos que la transformada $z$ esta dada por: 
+
+\begin{equation}
+    H(z) = \frac{\sum_{j=0}^n b_{n-j} z^j}{\sum_{i=0}^n a_{n-i} z^i}
+\end{equation}
+
+\section{Observabilidad}
+
+Definiremos que un sistema es observable cuando el rango de $W_o$ es igual al orden del sistema, es decir, $W_o$ no debe ser singular.
+
+\begin{equation}
+    W_o = 
+    \begin{bmatrix}
+        C \\ C\Phi \\ C \phi^2 \\ \vdots \\ C \Phi^n
+    \end{bmatrix}
+\end{equation}
+
+La forma canonica observables esta dada por: 
+
+\begin{equation}
+    \siseq{ 
+        qz = 
+        \begin{bmatrix}
+            -a_1 & 1 & 0 & \cdots & 0 \\ 
+            -a_2 & 0 & 1 & \cdots & 0 \\
+            \vdots & 0 & 0 & \ddots & 0 \\
+            -a_{n-1} & 0 & 0 & \cdots & 1 \\
+            -a_n & 0 & 0 & \cdots & 0 \\
+        \end{bmatrix} z + 
+        \begin{bmatrix}
+            b_1 \\ b_2 \\ \vdots \\ b_{n-1} \\ b_n \\
+        \end{bmatrix} u \\ \\
+        y = 
+        \begin{bmatrix}
+            1 & 0 & \cdots & 0    
+        \end{bmatrix} z
+    }
+\end{equation}
+
+\section{Controlabilidad}
+
+Definiremos que un sistema es controlable cuando $W_c$ sea no singular, es decir, exista $W_c^{-1}$.
+
+\begin{equation}
+    W_c = 
+    \begin{bmatrix}
+        \Gamma & \Gamma \Phi & \cdots & \Gamma \Phi^n \\
+    \end{bmatrix}
+\end{equation}
+
+La forma canonica controlable esta dada por: 
+
+\begin{equation}
+    \siseq{ 
+        qz = 
+        \begin{bmatrix}
+            -a_1 & -a_2 & \cdots & -a_{n-1} & -a_n \\
+            1 & 0 & \cdots & 0 & 0 \\
+            0 & 1 & \cdots & 0 & 0 \\
+            \vdots & 0 & \ddots & \vdots & \vdots \\
+            0 & 0 & \cdots & 1 & 0 \\
+        \end{bmatrix} z + 
+        \begin{bmatrix}
+            1 \\ 0 \\ \vdots \\ 0 
+        \end{bmatrix} u \\ \\
+        y = 
+        \begin{bmatrix}
+            b_1 & b_2 & \cdots & b_{n-1} & b_n
+        \end{bmatrix} z
+     }
+\end{equation}

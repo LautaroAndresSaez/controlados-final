@@ -1,0 +1,38 @@
+\documentclass{book}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{anysize}
+
+\usetikzlibrary{shapes ,arrows}
+
+
+
+\title{Resumen \\ Sistemas controlados por computadora}
+\author{Saez, Lautaro Andres}
+\date{}
+
+\newcommand{\siseq}[1]{\left\{ 
+    \begin{array}{c}
+        #1
+    \end{array}
+\right.}
+
+\begin{document}
+    \maketitle
+  
+
+    \tikzstyle{block} = [draw, fill=blue!20, rectangle, 
+    minimum height=3em, minimum width=6em]
+    \tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+    \tikzstyle{input} = [coordinate]
+    \tikzstyle{output} = [coordinate]
+    \tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+    \tikzstyle{big-block} = [draw, rectangle, minimum height= 12em, minimum width= 24em]
+
+    \input{unidades/unidad-i.tex}
+    \input{unidades/unidad-ii.tex}
+    \input{unidades/unidad-iii.tex}
+\end{document}
