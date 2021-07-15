@@ -1,0 +1,167 @@
+\chapter{Control óptimo} 
+
+\section{El criterio}
+
+El criterio que vamos a intentizar minimizar es: 
+
+\begin{equation}
+    J = E\left\{
+        \int_0^{Nh} \left[
+            x^T(t) Q_{1e} x(t)
+            + 2x^T(t) Q_{12e}u(t)
+            + u^T(t)Q_{2e}u(t)
+        \right]
+        + x^T(Nh)Q_{0}x(Nh)
+     \right\}
+\end{equation}
+
+Para discretizar la función de costos integramos por partes, obteniendo: 
+
+\begin{equation}
+    J = E\left\{ \sum_0^{N-1} \left[ 
+        x^T_kQ_1x_k
+        + 2x^T_kQ_{12}u_k
+        + u^T_kQ_2u_k
+    \right] + x^T_NQ_0x_N \right\}
+\end{equation}
+
+Para un sistema LTI, obtenemos: 
+
+\begin{equation}
+    \begin{array}{ccc}
+        Q_1 & = & \Phi^TQ_{1e}\Phi h \\
+        Q_{12} & = & \Phi^T[Q_{1e}\Gamma + Q_{12e}]h \\ 
+        Q_2 & = & [\Gamma^TQ_{1e}\Gamma + 2\Gamma Q_{12e} + Q_{2e}]h
+    \end{array}
+\end{equation}
+
+Las matrices $Q_1$ semi-positiva, y $Q_2$ es definida posiva, es posible eliminar $Q_{12}$.
+
+\subsection{Eliminación de $Q_{12}$}
+
+Para lograr eliminar $Q_{12}$ es necesario hacer una pequeña transformación, donde tomaremos: 
+
+\begin{equation}
+    u = \tilde{u} - M^Tx
+\end{equation}
+
+Donde $M=Q_{12}Q_2^{-1}$. Con esto obtenemos: 
+
+\begin{equation}
+    \begin{array}{ccc}
+        \tilde{\Phi} & = & \Phi - \Gamma M^T \\ 
+        \tilde{Q_1} & = & Q_1 - Q_{12}Q_2^{-1}Q_{12}^T \\ 
+    \end{array}
+\end{equation}
+
+Por lo que el sistema, con su restricción queda expresado como: 
+
+\begin{equation}
+    \label{eq:sis-j}
+    \siseq{
+        qx = \tilde{\Phi}x + \Gamma \tilde{u} + v \\ 
+        y = C x + e\\ 
+        J = E\left\{ 
+            \sum_0^{N-1}\left[ 
+                x^T_k\tilde{Q_1}x_k + \tilde{u}^TQ_2\tilde{u}
+            \right] + x^T_NQ_0x_N
+        \right\}
+    }
+\end{equation}
+
+\section{Caso deterministico}
+
+Para este caso tomaremos $v$ y $e$ como nulas, ya que el caso de pertubaciones no nulas será tratado más adelante.
+El problema consiste en encontrar $u_i$ de manera tal de minimizar $J$. Para ello utilizaremos un teorema: 
+
+Consideremos el sistema descripto por la ecuación \ref{eq:sis-j}. Tomemos que $u_k=-L_kx_k$, y plantiemos: 
+
+\begin{equation}
+    S_k = 
+    \Phi^T S_{k+1} \Phi + Q_1 -
+    L^T_k[ Q_2 + \Gamma^TS_{k+1}\Gamma ]L_k
+\end{equation}
+
+Donde es posible expresar a $L$ como: 
+
+\begin{equation}
+    L_k = 
+    [Q_2 + \Gamma^TS_{k+1}\Gamma]^{-1}\Gamma^TS_{k+1}\Phi
+\end{equation}
+
+Y con la condición final $S(N)=Q_0$. Si $S_k$ tiene solución
+que es semidefinida positiva y que $Q_2+\Gamma^TS_k\Gamma$ es definida positiva. 
+Entonces existe una única estrategia de control admisible, de la forma nombrada, que 
+minimiza $J$ cuando $Q_{12}=0$. El valor mínimo será:
+
+\begin{equation}
+    \min{J}=x_0^TS_0x_0
+\end{equation}
+
+\section{Caso estocastico}
+
+Para el caso estocastico deberemos estimar los estados $x_k$, para ello utilizaremos el filtro de Kalman.
+
+\subsection{Filtro de Kalman}
+
+Tomemos el estimador: 
+
+\begin{equation}
+    \hat{x}(k+1|k) =
+    \Phi\hat{x}(k|k-1)+\Gamma u_k + K_k [y_k-C\hat{x}(k|k-1)]
+\end{equation}
+
+El error de reconstrucción esta dado por: 
+
+\begin{equation}
+    \label{eq:error-kalman}
+    \tilde{x}(k+1)=[\Phi-K_kC]\tilde{x}(k)+v_k - K_ke_k
+\end{equation}
+
+El filtro de Kalman minimiza la varianza del error de estimación ($P_k$), teniendo 
+en cuenta las propiedades del ruido.
+
+\begin{equation}
+    P_k=E\{[\tilde{x}_k - E(\tilde{x}_k)][\tilde{x}_k - E(\tilde{x}_k)]^T\}
+\end{equation}
+
+El valor medio ó la esperanza de $\tilde{x}$ se obtiene mediante la ecuación \ref{eq:error-kalman}, dando como resultado
+
+\begin{equation}
+    E[\tilde{x}(k+1)]=[\Phi-K_kC]E[\tilde{x}(k)]
+\end{equation}
+
+Si tomamos que $E[x(0)]=m_0$, el valor medio del error
+de reconstrucción es nulo para todos los instantes $k\geq 0$,
+independientemente de $K$ si $E[\hat{x}]=0$. Por lo tanto, podemos 
+plantear la ecuación recursiva: 
+
+\begin{equation}
+    P_{k+1}=
+    \Phi P_k\Phi^T 
+    + R_1
+    - K_k[R_2+CP_kC^T]K_k^T
+\end{equation}
+
+Donde:
+
+\begin{equation}
+    \begin{array}{ccc}
+        E[x_0x_0^T] & = & R_0 \\
+        E[vv^T] & = & R_1 \\ 
+        E[ee^T] & = & R_2 \\ 
+        E[ve^T] & = & R_{12} \\ 
+        P_0 & = & R_0
+    \end{array} 
+\end{equation}
+
+La expresión de $K_k$ queda expresada como: 
+
+\begin{equation}
+    K_k = [\Phi P_k C^T + R_{12}][R_2 + C P_k C^T]^{-1}
+\end{equation}
+
+\subsection{Problema LQG}
+
+Para resolver el problema en el cual el sistema presenta ruido, podemos utilizar el problema de separación, y estimar los estados mediante 
+el filtro de Kalman para luego utilizar el valor de $L$ encontrado con la ecuación de Ricatti.

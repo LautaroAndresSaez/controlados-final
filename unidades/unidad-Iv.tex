@@ -1,0 +1,132 @@
+\chapter{Control Polinomial}
+
+En este capítulo se estudiara la retroalimentación por la salida, 
+pero utilizando con control basado en los polinomios $B_d(z)$ y $A_d(z)$.
+
+\begin{figure}
+    \input{diagrams/polinomial.tex}
+    \caption{Sistema retroalimentado por control polinomial.}
+    \label{fig:control-polinomial}
+\end{figure}
+
+La ley de control propuesta es:
+
+\begin{equation}
+    u(k) = \frac{T(q)}{R(q)}u_c(k) - \frac{S(q)}{R(q)}y(k)
+\end{equation}
+
+Donde se debe cumplir que: 
+
+\begin{equation}
+    grad(T) \leq grad(R) \land grad(S) \leq grad(R)
+\end{equation}
+
+Aplicando el teorema de Mason, logramos:
+
+\begin{equation}
+    \label{eq:pol-basica}
+   \frac{Y(z)}{U_c(z)} = \frac{T(z)B(z)}{R(z)A(z) + S(z)B(z)} = \frac{B_d(z)}{A_d(z)}
+\end{equation}
+
+
+\section{Definiciones previas}
+
+Definiremos que $B(z)$ puede ser expresado como:
+
+\begin{equation}
+    B(z) = B^+(z)B^-(z)
+\end{equation}
+
+Donde se cumple que: 
+
+\begin{itemize}
+    \item $B^+$: Contiene todos los terminos que deseamos eliminar, estos terminos deben estar dentro del circulo unidad.
+    \item $B^-$: Contiene todos los terminos que no queremos o podemos eliminar.
+    \item $B_d$: Es posible expresarla como $B^-B_d^\prime$.
+    \item $R$: Debe contener todos los terminos de $B$ que deseemos eliminar, por lo tanto: $R=B^+R^\prime$.
+\end{itemize}
+
+Remplazando en la ecuación ecuación \ref{eq:pol-basica}:
+
+\begin{equation}
+    \frac{TB}{B^+R^\prime A+SB} = \frac{TB^-}{R^\prime A + SB^-} = \frac{A_oB^-B^\prime_d}{A_oA^\prime_d}
+\end{equation}
+
+Por lo que se desprenden las ecuaciones: 
+
+\begin{equation}
+    \siseq{
+        T = A_oB^\prime_d \\ 
+        R^\prime A + SB^- = A_oA^\prime_d
+    }
+\end{equation}
+
+Es posible incluir integradores al polinomio $R$ con la finalidad de eliminar el ruido del sistema.
+
+\begin{equation}
+    R^\prime = R^{\prime\prime}(z-1)^l
+\end{equation}
+
+\section{Solución de la ecuación}
+
+Para resolver la ecuación polinomial seguiremos el siguiente algoritmo: 
+
+\begin{enumerate}
+    \item Verificar condiciones de causalidad del proceso y del modelo:
+        \subitem $g(A)\geq g(B)$
+        \subitem $g(A_d)-g(B_d) \geq g(A) - g(B)$
+    \item Factorizar el polinomio $B$ en los ceros que queremos cancelar y los que no: 
+        \subitem $B=B^+B^-$
+    \item Verificar que el modelo deseado contenga $B^-$:
+        \subitem $B_d=B^-B^\prime_d$
+    \item Determinar el grado del polinomio observador: 
+        \subitem $g(A_o) \geq 2g(A)-g(A_d) -g(B^+) + l -1$
+    \item Construir el model del observador, en genearal $z_i=0$:
+        \subitem $A_o=\Pi_i^{g(A_o)} (z-z_i)$
+    \item Determinar el grado de los polinomios $R^{\prime\prime}$ y $S$:
+        \subitem $g(R^{\prime\prime})=g(A_o)+g(A_d)-g(A)-l$
+        \subitem $g(S)=l + g(A) - 1$
+    \item Escribir $R^{\prime\prime}$ y $S$ en forma de polinomios con coeficientes 
+    indeterminados y resolver la ecuación de diseño: 
+        \subitem $A(z-1)^lR^{\prime\prime} + B^-S=A_oA_d$
+    \item Escribir la let de control: 
+        \subitem $R=B^+(z-1)^lR^{\prime\prime}$
+        \subitem $T=A_oB^\prime_d$
+    \item Verificar la causalidad del controlador: 
+        \subitem $g(R) \geq g(T)$
+        \subitem $g(R) \geq g(S)$
+\end{enumerate}
+
+\section{Análisis de pertubaciones}
+
+La transferencias que se obtienen son las siguientes: 
+
+\begin{equation}
+    H_v(q) = \frac{BR}{AR+BS}
+\end{equation}
+
+\begin{equation}
+    H_e(q) = \frac{BS}{AR+BS}
+\end{equation}
+
+Donde $v$ representa una perturbación a la salida del controlador, 
+mientras que $e$ representa una perturbación a la salida del sistema.
+
+Si análizamos la expresión de $H_v$, obtenemos que: 
+
+\begin{equation}
+    H_v = \frac{B^+(z-1)^lR^{\prime\prime}}{A_oA_d}
+\end{equation}
+
+Por lo tanto los polos de la pertubación estan determinados por el observador y del polinomio denominador deseado.
+Esto puede producir que el $g(A_o)+g(A_d)$ sea mayor al del sistema desde $u_c$ a $y$, por lo tanto la eliminación 
+de la perturbación puede ser más lenta que la convergencia del sistema. 
+
+Al análizar la expresión de $H_e$, obtenemos un resultado similar: 
+
+\begin{equation}
+    H_e = \frac{B^+S}{A_oA_d}
+\end{equation}
+
+Aunque el orden del sistema dependera de los ceros en común entre $B^+S$ y $A_oA_d$.
+

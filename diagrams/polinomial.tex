@@ -1,0 +1,20 @@
+\begin{tikzpicture}[node distance=2.5cm ,auto, >=latex']    
+    \node [input, name=input] {};
+    \node [block, right of=input] (T) {$T(q)$};
+    \node [sum, right of=T] (sum) {$+$};
+    \node [block, right of=sum, node distance=2cm] (R) {$\frac{1}{R(q)}$};
+    \node [block, right of=R, node distance=3.5cm] (system) {$\frac{B(q)}{A(q)}$};
+    \node [output, name=half, right of=system] {};
+    \node [output, name=output, right of= half] {};
+    \node [block, below of=R] (S) {$S(q)$};
+
+
+    \draw [draw, ->] (input) -- node {$u_c(k)$} (T);
+    \draw [draw, ->] (T) -- node {} (sum);
+    \draw [draw, ->] (sum) -- node {} (R);
+    \draw [draw, ->] (R) -- node {$u(k)$} (system);
+    \draw [draw, -] (system) -- node {$y(k)$} (half);
+    \draw [draw, ->] (half) -- node {} (output);
+    \draw [draw, ->] (half) |- node {} (S);
+    \draw [draw, ->] (S) -| node {$-$} (sum);
+\end{tikzpicture} 
