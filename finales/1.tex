@@ -1,0 +1,445 @@
+\section*{14-05-2021}
+
+\subsection*{1-}
+
+\subsubsection*{Enunciado}
+
+Realizar un mapa conceptual con los distintos métodos de  discretización de sistemas. 
+
+\renewcommand{\labelenumi}{\alph{enumi})}
+\begin{enumerate}
+    \item Indicar las diferencias entre discretización de sistemas con el muestreo de señales. 
+    \item Indicar una regla empírica para calcular el periodo $h$. 
+\end{enumerate}
+
+\subsubsection*{Resolución}
+
+\subsection*{3-}
+
+\subsubsection*{Enunciado}
+
+Analizar el problema de control por retroalimentación de estados para 
+un sistema de orden $2$. En los siguientes casos: 
+
+\begin{enumerate}
+    \item Solo se conoce la salida.
+    \item Se conoce $1$ estado. 
+    \item Que pasa con el ruido $v[k]$ y $e[k]$.
+\end{enumerate}
+
+\begin{equation}
+    \siseq{
+        x[k+1] = Ax[k] + Bu[k] + v[k] \\ 
+        y[k] = Cx[k] + e[k]
+    }
+\end{equation}
+
+\subsubsection*{Resolución}
+
+Como nunca conocemos todos los estados, entonces será necesario utilizar un observador, 
+para ello debemos pedir que el sistema sea observable. Mientras que para poder controlar 
+al sistema debemos pedir que el sistema sea controlable.
+
+Para los 3 casos podemos plantear la misma ley de control y su determinación no depende 
+del observador utilizado (Teorema de separación). La ley de control será:
+
+\begin{equation}
+    u[k] = -Lx[k]
+\end{equation}
+
+Donde $L$ puede depender de $k$, en cuyo caso se podría plantear un problema LQ o LQG. 
+En ese caso buscaremos minimizar una función de costos $J$. Si por el contrario, planteamos 
+$L$ de como un control invariante en el tiempo, entonces, podremos ubicar los polos 
+del sistema en lazo cerrado, en cualquier lugar del espacio, y para ello podríamos utilizar 
+el Teorema de Ackermann. Por lo que la expresión del controlador tiene la forma: 
+
+\begin{equation}
+    L = 
+    \begin{bmatrix}
+        0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}
+        \Gamma & \Phi\Gamma
+    \end{bmatrix}^{-1} P_d(A)   
+\end{equation}
+
+Donde $P_d(A)$ es el polinomio caractistico del sistema a lazo cerrado.
+
+Para este ejercicio tomaremos $P_d(\lambda)=\lambda^2$, es decir, buscaremos un 
+sistema de tipo deatbeat. Y estaremos trabajando con el sistema dado por: 
+
+\begin{equation}
+    \siseq{
+        qx = \begin{bmatrix}
+            1 & 1 \\ 
+            0 & 1
+        \end{bmatrix}x 
+        + 
+        \begin{pmatrix}
+            0.5 \\ 1
+        \end{pmatrix}u  \\ 
+        y = Cx
+    }
+\end{equation}
+
+Donde $L$ esta dado como: 
+
+\begin{equation}
+    L = \begin{bmatrix}
+        0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        -1 & 1.5 \\ 
+        1 & -0.5 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        1 & 2 \\ 
+        0 & 1 
+    \end{bmatrix} \Leftrightarrow
+    L = \begin{bmatrix}
+        1 & 1.5
+    \end{bmatrix}
+\end{equation}
+
+a) Si solo conocemos $y[k]$
+
+Como fue nombrado anteriormente, debemos plantear un observador, 
+para este caso necesitaremos estimar los $2$ estados. Por lo cual, podemos 
+estimar los estados por calculo directo ó por un sistema utilizando la información
+de la muestra anterior. 
+
+\textbf{Calculo directo}
+
+\textbf{Observador dinamico}
+
+\begin{equation}
+    \label{eq:final-1-k}
+    \hat{x}_{k+1|k} = 
+    \Phi \hat{x}_{k|k-1} + \Gamma u_k +
+    K [y_k - C\hat{x}_{k|k-1}]
+\end{equation}
+
+Donde es posible calcular $K$ utilizando el Teorema de Ackermann, levemente modificado: 
+
+\begin{equation}
+    K = P_d(A) W_o^{-1}
+    \begin{bmatrix}
+        0 & 0 & \cdots & 1
+    \end{bmatrix}^T
+\end{equation}
+
+Donde $W_o$ es la matriz de observabilidad, y $P_d(\lambda)$ 
+es el polinomio caracteristico del observador, si elegimos $P_d(\lambda)=\lambda^2$, 
+tendremos un observador Deadbeat, donde los estados estimador convergeran a los estados 
+reales en $2$ muestras. Para nuestro ejemplo, tomaremos $C=\begin{pmatrix}
+    1 & 1
+\end{pmatrix}$, ya no conocemon ningun estado del sistema. Por lo tanto $K_1$, queda dado 
+como: 
+
+\begin{equation}
+    K = 
+    \begin{bmatrix}
+        1 & 2 \\ 
+        0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}
+        2 & -1 \\ 
+        -1 & 1    
+    \end{bmatrix}
+    \begin{bmatrix}
+        0 \\ 1
+    \end{bmatrix} \Leftrightarrow 
+    K = \begin{bmatrix}
+        1 \\ 1
+    \end{bmatrix}
+\end{equation}
+
+b) Solo conocemos $1$ estado. 
+
+Para este caso tomaremos $C=\begin{pmatrix}
+    1 & 0
+\end{pmatrix}$, de esta manera $y$ coincide con el estado $x_1$. 
+
+Si bien es posible utilizar el calculo directo y un servador dinamico con la información 
+de hasta la muestra anterior. En este caso, podemos incluir la infomación del instante actual
+y reducir el orden el sistema, ya que, $1$ estado lo mediriamos y el otro lo estimariamos. 
+Para este caso la el estimador queda descripto como: 
+
+\begin{equation}
+    \hat{x}_{k+1|k+1} = [I-KC][\Phi\hat{x}_{k|k} + \Gamma u_k ]+ Ky_{k+1}
+\end{equation}
+
+El error de reconstrucción esta dado por: 
+
+\begin{equation}
+ \tilde{x}_{k+1|k+1} = [I-KC]\Phi\hat{x}_{k|k}
+\end{equation}
+
+Para elegir $K$ se debe tratar de generar la submatriz nula más grande posible, 
+donde cada fila anulada se traduce en $1$ estado estimado sin error. Para este ejemplo: 
+
+\begin{equation}
+    I-KC = 
+    \begin{bmatrix}
+        1 & 0 \\ 
+        0 & 1
+    \end{bmatrix} - 
+    \begin{pmatrix}
+        K_1 \\ K_2
+    \end{pmatrix} 
+    \begin{pmatrix}
+        1 & 0
+    \end{pmatrix} \Leftrightarrow 
+    I-KC = 
+    \begin{pmatrix}
+        1-K_1 & 0 \\ 
+        -K_2 & 1
+    \end{pmatrix}
+\end{equation}
+
+En este caso solo es posible generar una matriz nula de orden $1$, tomando $K_1=1$. 
+Para obtener el valor de $K_2$ debemos analizar los polos de $[I-KC]\Phi$, entonces 
+
+\begin{equation}
+    [I-KC]\Phi = 
+    \begin{bmatrix}
+        0 & 0 \\ 
+        -K_2 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        1 & 1 \\ 
+        0 & 1
+    \end{bmatrix} \Leftrightarrow
+    [I-KC]\Phi = 
+    \begin{bmatrix}
+        0 & 0 \\ 
+        -K_2 & 1-K_2
+    \end{bmatrix}
+\end{equation}
+
+Como la matriz resultante es triangular, entonces los polos se encuentran en $0$ y $1-K_2$. 
+Sabemos que para que un sistema distreto sea estable sus polos deben estar dentro del circulo unidad. 
+Y por lo tanto $|1-K_2|<1$, en este caso tomaremos $K_2=1$, ya que hace que el polo se encuentre en $0$. 
+Lo que asegura que el estado estacionario se llegue en $1$ paso. Luego la ganancia del observador queda dada por: 
+
+\begin{equation}
+    K = \begin{bmatrix}
+        1 \\ 1
+    \end{bmatrix}
+\end{equation}
+
+c) Analisis del sistema con ruidos $v$ y $e$
+
+En caso de tener ruido, primero debemos plantear la naturaleza del ruido. 
+Si los ruidos son deterministicos, el control por retroalimentación de estados 
+quizas no sea la mejor opción, ya que, no nos permite eliminar pertubaciones constantes 
+y por lo tanto nos convendria optar por otro tipo de control, como por ejemplo, un 
+enfoque polinomial. En dicho caso solo retroalimentaremos la salida del sistema, y 
+buscaremos la transferencia deseada.
+
+El otro caso es tener ruidos estocasticos, en el mejor de los casos, que 
+tanto $v$ y $e$ sean gaussianos, podremos aproximar los estados directamente por el filtro de Kalman. 
+Pero si $v$ y $e$ no son gaussianos, deberemos reformular el sistema, para lo cual utilizaremos el 
+Teorema de factorización espectral. Lo que nos permite expresar tanto a $v$ como a $e$, 
+como salidas de un sistema cuya entrada es un ruido gaussiano. Para luego, poder aplicar el 
+filtro de Kalman.
+
+El filtro de Kalman toma un estimador utilizando información del instante anterior, por lo que tiene la forma de la 
+ecuación \ref{eq:final-1-k}, pero el calculo de $K$ se realiza minimizando la varianza del error de estimación ($P_k$).
+
+Por lo que surgen las siguientes ecuaciones: 
+
+\begin{equation}
+    \siseq{
+        P_{k+1} = \Phi P_k \Phi^T + R_1 - K_k[R_2 + CP_kC^T]K_k^T \\ 
+        K_{k} = [\Phi P_k C^T + R_{12}][R_2 + CP_kC^T]^{-1}
+    }   
+\end{equation}
+
+Donde: 
+
+\begin{equation}
+    \begin{array}{ccc}
+        E[x_0x_0^T] &=& R_0 \\
+        E[vv^T] &=& R_1 \\
+        E[ee^T] &=& R_2 \\
+        E[ve^T] &=& R_{12} \\
+        P_0 &=& R_0 
+    \end{array}
+\end{equation}
+
+Para este ejemplificar tomaremos que $v$ y $e$ son ruidos gaussianos, de varianza unitaria e independetes entre si, y 
+que la varianza de $x_0$ es $I$. Por lo tanto: 
+
+\begin{equation}
+    \begin{array}{c}
+        R_0 = P_0 = I \\
+        R_1 = I \\ 
+        R_2 = 1 \\ 
+        R_{12} = 0 \\
+    \end{array}
+\end{equation}
+
+Y la matriz $C$ será la misma que la del inciso $b$. Por lo tanto: 
+
+\begin{equation}
+    K_0 = 
+    \begin{bmatrix}
+        1 & 1 \\
+        0 & 1
+    \end{bmatrix} \begin{pmatrix}
+        1 & 0
+    \end{pmatrix} [1 + CC^T]^{-1} \Leftrightarrow
+    K_0 = \begin{bmatrix}
+        0.5 \\ 0
+    \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+    P_1 = \begin{bmatrix}
+        2.5 & 1 \\ 
+        1 & 2 
+    \end{bmatrix}    
+\end{equation}
+
+\subsection*{4-}
+
+
+\subsection*{5-}
+
+\subsubsection*{Enunciado}
+
+\begin{enumerate}
+    \item Dada una función de costos $J$ con sus respectivos pesos, indicar como se diseña una acción de control para un sistema discreto. (Discretizado con ZOH y $h=1$).
+    \item Si se mantiene la misma función de costos, el mismo $h$ y los mismos pesos de a) pero discretizado por Euler. Puede usarse el mismo controlador?
+\end{enumerate}
+
+\subsubsection*{Resolución}
+
+Para ejemplificar este ejercicio trabajaremos con el integrador doble, el cual tiene la forma: 
+
+\begin{equation}
+    H(S) = \frac{1}{S^2}
+\end{equation}
+
+Y la función de costos: 
+
+\begin{equation}
+    J = \sum_{k=0}^{1} \left\{x_k x_k^T \right\} + x_2 x_2^T
+\end{equation}
+
+a) Discritzación ZOH y $h=1$.
+
+El calculo del controlador que minimiza $J$ no depende del método de discretización, aunque si $J$ esta dado para el sistema continuo se tiene que 
+hacer una discretización previa, el cual esta dado por: 
+
+\begin{equation}
+    \begin{array}{ccc}
+        Q_1 & = & \Phi^TQ_{1e}\Phi h \\
+        Q_{12} & = & \Phi^T[Q_{1e}\Gamma + Q_{12e}]h \\ 
+        Q_2 & = & [\Gamma^TQ_{1e}\Gamma + 2\Gamma Q_{12e} + Q_{2e}]h
+    \end{array}
+\end{equation}
+
+Para un sistema que sea LTI, donde el subíndice $e$ indica las funciones de costos de la versión continua de $J$.
+Cabe destacar que $Q_0=Q_{0e}$. 
+
+Otro analisis previo es eliminar la matriz $Q_{12}$. Esto se obtiene haciendo un cambio de variable de 
+la forma $\tilde{u} = u + M^T x$, donde $M=Q_{12}Q_2^{-1}$.
+
+Una vez aclaradas algunas salvedades, pasaremos a describir el método de Ricatti. 
+Se plantea un controlador de la forma: $u_k = -L_kx_k$, por lo que 
+se elimina la invariancia en el tiempo del sistema retroalimentado. Para calcular los 
+valores de $L_k$ se plantea una ecuación recursiva: 
+
+\begin{equation}
+    L_k = [Q_2 + \Gamma^TS_{k+1}\Gamma]^{-1}\Gamma^TS_{k+1}\Phi
+\end{equation}
+
+Donde $S_k$ tiene la siguiente forma: 
+
+\begin{equation}
+    S_k = 
+    \Phi^T S_{k+1} \Phi + Q_1 -
+    L^T_k[ Q_2 + \Gamma^TS_{k+1}\Gamma ]L_k
+\end{equation}
+
+Cabe destacar que para utilizar el método de Ricatti se deben cumplir las siguientes condiciones: 
+
+\begin{itemize}
+    \item $Q_1$ esta definida semipositiva. 
+    \item $Q_2$ esta definida positva. 
+    \item $Q_{12}$ es nula. 
+    \item $S_N=Q_0$.
+\end{itemize}
+
+Para este ejemplo tenemos que $N=2$, y que $S_2=I$, $Q_1=Q_0=I$ y $Q_2=0$. La versión discreta por ZOH del integrador doble es de la forma: 
+
+\begin{equation}
+    \siseq{
+        qx = \begin{bmatrix}
+            1 & 1 \\ 
+            0 & 1 \\
+        \end{bmatrix}x + \begin{bmatrix}
+            0.5 \\ 1 \\ 
+        \end{bmatrix}u \\ 
+        y = \begin{pmatrix}
+            1 & 0
+        \end{pmatrix}x
+    }
+\end{equation}
+
+La soluciones son: 
+
+\begin{equation}
+    \siseq{
+        L_1 = \frac{1}{5} \begin{pmatrix}
+            2 & 3
+        \end{pmatrix} \\ 
+        S_1 = \frac{1}{10} \begin{bmatrix}
+            18 & 7 \\ 
+            7 & 28
+        \end{bmatrix} \\ 
+        L_0 = \frac{2}{79} \begin{pmatrix}
+            32 & 95
+        \end{pmatrix}
+    }
+\end{equation}
+
+b) Discretización por método de Euler. 
+
+Es posible utilizar el mismo controlador si cambio el método de discretización, pero nada garantiza que el sistema siga siendo optimo el terminos de $J$. 
+En general como el sistema discreto tiene una expresión distinta, es decir, no se conservan las matrices $\Phi$ y $\Gamma$ y como $L_k$ depende de dichas 
+matrices el controlador optimo cambiara de forma. Para el ejemplo, al discretizar un integrador doble con el método de Euler obtenemos: 
+
+\begin{equation}
+    \siseq{
+        qx = \begin{bmatrix}
+            0 & 1 \\ 
+            -1 & 2
+        \end{bmatrix}x + 
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} u \\ 
+        y = \begin{pmatrix}
+            1 & 0
+        \end{pmatrix}x
+    }
+\end{equation}
+
+En este caso la solución optima esta dada como: 
+
+\begin{equation}
+    \siseq{
+        L_0 = L_1 =\begin{pmatrix}
+            -1 & 2
+       \end{pmatrix} \\ 
+       S_1 = \begin{bmatrix}
+           1 & 0 \\ 
+           0 & 2
+       \end{bmatrix}
+    }
+\end{equation}
+
+En este caso se observa que la solución hallada en a) no es optima para b), y lo unico que cambiamos fue el método de discretización. Una de las cosas 
+que influye es que el ZOH añade la dinamica del mantedor al sistema discreto.
